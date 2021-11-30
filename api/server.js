@@ -2,17 +2,13 @@
 // require your posts router and connect it here
 
 const express = require('express');
-
+const postsRouter = require('./posts/posts-router')
 const server = express();
 
 server.use(express.json());
 
-server.get('/', (req, res) => {
-    res.send(`
-      <h2>Shelter API</h>
-      <p>Welcome to the Shelter API</p>
-    `);
-  });
-  
+server.use('/api/posts', postsRouter);
+
+
   module.exports = server;
   
