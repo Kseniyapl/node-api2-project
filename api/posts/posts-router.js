@@ -36,13 +36,15 @@ router.get('/:id', (req, res) => {
 
 router.post('', async(req, res)=>{
  try{
-    if(!req.body.title||!req.body.contents){
+    const { title, contents } = req.body;
+    const { id } = req.params  
+    if(!title||!contents){
         res.status(400).json({
             message: "Please provide title and contents for the post" 
         })
     }else{
-        const newPost = await Post.insert(req.body)
-            res.status(201).json(newPost)
+        await Post.insert(req.body)
+            res.status(201).json({id: Number(id), title, contents})
     }
  }catch(err){
     res.status(500).json({
@@ -52,26 +54,27 @@ router.post('', async(req, res)=>{
  }
 })
 
-router.put("/:id", (req, res) =>{
-const changes = req.body;
-    Post.update(req.params.id, changes)
-    .then(post=>{
-        if(!req.body.title||!req.body.contents){
+router.put("/:id", async(req, res) =>{
+    try {
+const { title, contents } = req.body;
+const { id } = req.params
+        if(!title||!contents){
             res.status(400).json({message: "Please provide title and contents for the post"  }) 
-        }if(!req.body.id){
-            res.status(404).json({ message: "The post with the specified ID does not exist" })   
          }else{
-            res.status(200).json(post)  
+            const post = await Post.findById(id)
+            if (!post) {
+                res.status(404).json({ message: "The post with the specified ID does not exist" })
+            } else {
+                await Post.update(id, { title, contents })
+                res.status(200).json({id: Number(id), title, contents})
+            }
         }
-    })
-    .catch(err =>{
-    console.log(err)
-        res.status(500).json({
-            message: "The post information could not be modified",
-            error: err.message
-        });
-    });
+    } catch (err) {
+        res.status(500).json({  message: "The post information could not be modified",
+        error: err.message})
+    }
 })
+           
 router.delete('/:id', (req, res) => { 
     const { id } = req.params
     Post.findById(id)
