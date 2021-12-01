@@ -72,21 +72,28 @@ const changes = req.body;
         });
     });
 })
-router.delete('/:id', (req, res) => {
-    Post.remove(req.params.id)
-        .then(count =>{
-    if(!count){
-        res.status(404).json({ message: "The post with the specified ID does not exist" }); 
-        }
-    else{
-        res.status(200).json({ message: 'Post has been deleted',  }); 
+router.delete('/:id', (req, res) => { 
+    const { id } = req.params
+    Post.findById(id)
+        .then(post =>{
+            if(post){
+                Post.remove(id)
+                .then(count => {
+                    if (count > 0) {
+                        res.status(200).json(post);
+                    } else {
+                        res.status(404).json({ message: `Post does not exist` })
+                    }
+                })
+        } else {
+            res.status(404).json({ message: 'Post does not exist' })
         }
     })
-    .catch(err =>{
-    console.log(err)
-    res.status(500).json({
-        message: "The post could not be removed",
-        error: err.message})
+        .catch(err =>{
+            console.log(err)
+            res.status(500).json({
+                message: "The post could not be removed",
+                error: err.message})
     })
 })
 
